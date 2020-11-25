@@ -1,0 +1,55 @@
+Working : Ultrasonic sensor sends pulses of 1ms to detect any obstacle. If obstacle less than 10cm range, then robot stops, servo motor move 90 degree then left turn->forward->right turn->forward. In this way obstacle is avoided.
+
+CODE
+
+#include <Servo.h> //include servo library as we are using servo motor
+int motorPin = 9; // pin where DC motor is connected
+int ServoPin = 1; // pin where DCservo motor is connected
+int triggerPin = 10; // pin where trigger pin of ultrasonic sensor is connected
+int echoPin = 9; // pin where echo pin of ultrasonic sensor is connected
+int time_taken; // to store time taken by sensor to receive pulse sent
+int distance; // to store distance from obstacle
+
+void setup() {
+  pinMode(motorPin, OUTPUT) ; // declare motor pin as OUTPUT
+  pinMode(triggerPin, OUTPUT);   // declare trigger pin as OUTPUT
+  pinMode(echoPin, INPUT);    // declare echo pin as INPUT
+  myservo.attach(servoPin); // define where servo motor pin is connected
+
+}
+
+void loop() {
+  digitalWrite(triggerPin, HIGH); // to send a pulse of 1ms high duration = 1 ms
+  delay(1);            // delay of 1ms
+  digitalWrite(triggerPin, LOW); // to send a pulse of 1ms low duration
+  delay(1);           // delay of 1ms
+
+  time_taken = pulseIn(echoPin, HIGH); // to find out time taken to receive pulse after deflected from obstacle
+
+  distance = (time_taken / 2) / 29.1; // find out distance using formula in data sheet
+  digitalWrite(motorPin, HIGH); // start DC motor to move forward
+  if (distance <= 10 && distance >= 0) { // check if obstacle is near, i.e. less than 10cm obstacle is present
+    digitalWrite(motorPin, LOW); // then stop DC motor
+    moveLeft(); // code for move left for servo motor
+    delay(1000); // wait for 1 secs
+    digitalWrite(motorPin, HIGH); // move in left by DC motor ON
+    delay(5000); // wait for 5 secs
+    moveRight(); // code for move right for servo motor
+    delay(1000); // wait for 1 secs
+    digitalWrite(motorPin, HIGH); // move in right by DC motor ON
+    delay(5000); // wait for 5 secs
+  }
+  void moveLeft() {
+    servo.write(90); // rotate servo motor 90 degrees for left turn
+    digitalWrite(motorPin, HIGH); // move in left direction
+    delay(2000); //wait for 2 secs
+    digitalWrite(motorPin, LOW); // stop after moving left
+    return; // return to main function
+  }
+  void moveRight() {
+    servo.write(90); // rotate servo motor 90 degrees for right turn
+    digitalWrite(motorPin, HIGH); // move in right direction
+    delay(2000); //wait for 2 secs
+    digitalWrite(motorPin, LOW); // stop after moving right
+    return; // return to main function
+  }
