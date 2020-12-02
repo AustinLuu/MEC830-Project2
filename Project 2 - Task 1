@@ -1,0 +1,92 @@
+#include <Servo.h>
+#include "Stepper.h"
+#include "IRremote.h"
+
+#define STEPS  32   
+#define trig 4
+#define echo 5 
+int  Steps2Take;  
+int receiver = 12; 
+int pos=45;
+double duration, distance;
+
+Stepper small_stepper(STEPS, 8, 10, 9, 11);
+Servo myservo;
+IRrecv irrecv(receiver);    
+decode_results results;    
+
+void setup()
+{ 
+  Serial.begin(9600);
+  irrecv.enableIRIn(); 
+  Serial.begin(9600); 
+  myservo.attach(7); 
+  myservo.write(pos);
+  pinMode(trig,OUTPUT);
+  pinMode(echo,INPUT);
+}
+
+void loop()
+{
+  myservo.write(pos);
+  if (irrecv.decode(&results)) // have we received an IR signal?
+
+  {
+    Serial.println(results.value,HEX);
+    switch(results.value)
+
+    {
+
+      case 0xFFA857: // Backward
+                      small_stepper.setSpeed(500); 
+                      Steps2Take  =  -6000;  
+                      small_stepper.step(Steps2Take);
+                      delay(30); 
+                      break;
+
+      case 0xFF629D: // Forward
+                      small_stepper.setSpeed(500);
+                      Steps2Take  =  6000;  
+                      small_stepper.step(Steps2Take);
+                      delay(30); 
+                      break;
+
+      case 0xFFC23D: //Move right
+                      myservo.write(90);
+                      small_stepper.setSpeed(500);
+                      Steps2Take = 2000;
+                      small_stepper.step(Steps2Take);
+                      delay(30);
+                      break;
+
+      case 0xFF22DD: //Move left
+                      myservo.write(45);
+                      small_stepper.setSpeed(500);
+                      Steps2Take = 2000;
+                      small_stepper.step(Steps2Take);
+                      delay(30);
+                      break;
+                
+    }
+    
+      irrecv.resume(); // receive the next value
+                 digitalWrite(8, LOW);
+                 digitalWrite(9, LOW);
+                 digitalWrite(10, LOW);
+                 digitalWrite(11, LOW);       
+  }  
+
+
+}
+
+double dist_calc()
+{
+  digitalWrite(trig,LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig,HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig,LOW);
+  duration = pulseIn(echo,HIGH); 
+  distance = 100.0*(343.0*(duration/2.0))/1000000.0; 
+  return (distance);
+}
