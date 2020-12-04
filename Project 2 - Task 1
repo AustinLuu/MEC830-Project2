@@ -5,7 +5,7 @@
 #define STEPS  32   
 #define trig 4
 #define echo 5 
-int  Steps2Take;  
+int Steps2Take;  
 int receiver = 12; 
 int pos=45;
 double duration, distance;
@@ -32,23 +32,24 @@ void loop()
   if (irrecv.decode(&results)) // have we received an IR signal?
 
   {
-    Serial.println(results.value,HEX);
+    Serial.println(results.value);
     switch(results.value)
 
     {
 
+
       case 0xFFA857: // Backward
                       small_stepper.setSpeed(500); 
-                      Steps2Take  =  -6000;  
+                      Steps2Take  =  -2000;  
                       small_stepper.step(Steps2Take);
                       delay(30); 
                       break;
 
       case 0xFF629D: // Forward
                       small_stepper.setSpeed(500);
-                      Steps2Take  =  6000;  
+                      Steps2Take  =  2000;  
                       small_stepper.step(Steps2Take);
-                      delay(30); 
+                      delay(5); 
                       break;
 
       case 0xFFC23D: //Move right
@@ -60,7 +61,7 @@ void loop()
                       break;
 
       case 0xFF22DD: //Move left
-                      myservo.write(45);
+                      myservo.write(0);
                       small_stepper.setSpeed(500);
                       Steps2Take = 2000;
                       small_stepper.step(Steps2Take);
@@ -79,14 +80,3 @@ void loop()
 
 }
 
-double dist_calc()
-{
-  digitalWrite(trig,LOW);
-  delayMicroseconds(2);
-  digitalWrite(trig,HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trig,LOW);
-  duration = pulseIn(echo,HIGH); 
-  distance = 100.0*(343.0*(duration/2.0))/1000000.0; 
-  return (distance);
-}
