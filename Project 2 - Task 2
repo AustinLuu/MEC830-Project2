@@ -1,0 +1,64 @@
+#include <Servo.h>
+#include "Stepper.h"
+#include "IRremote.h"
+
+#define STEPS  32   
+#define trig 4
+#define echo 5 
+int Steps2Take;  
+int receiver = 12; 
+int pos=45;
+int startbutton = 13;
+double duration, distance;
+
+Stepper small_stepper(STEPS, 8, 10, 9, 11);
+Servo myservo;
+IRrecv irrecv(receiver);    
+decode_results results;    
+
+void setup()
+{ 
+  Serial.begin(9600);
+  irrecv.enableIRIn(); 
+  Serial.begin(9600); 
+  myservo.attach(7); 
+  myservo.write(pos);
+  pinMode(trig,OUTPUT);
+  pinMode(echo,INPUT);
+  pinMode(startbutton, INPUT_PULLUP);
+}
+
+void loop()
+{
+  if(digitalRead(startbutton)==LOW)
+  {
+    small_stepper.setSpeed(500);
+    
+    //go straight
+    myservo.write(pos);
+    small_stepper.step(17000);
+    delay(10);
+    
+    //turn right
+    myservo.write(90);
+    small_stepper.step(6000);
+    delay(10);
+  
+    //go straight
+    myservo.write(45);
+    small_stepper.step(14000);
+    delay(10);
+  
+    //turn left
+    myservo.write(0);
+    small_stepper.step(6000);
+    delay(10);
+  
+    //go straight
+    myservo.write(45);
+    small_stepper.step(14000);
+    delay(10);
+  }
+
+}
+
