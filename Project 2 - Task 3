@@ -1,0 +1,75 @@
+#include <Servo.h>
+#include "Stepper.h"
+#include "IRremote.h"
+
+#define STEPS  32   
+#define trig 4
+#define echo 5 
+int Steps2Take;  
+int receiver = 12; 
+int pos=45;
+double duration, distance;
+int stage=0;
+
+Stepper small_stepper(STEPS, 8, 10, 9, 11);
+Servo myservo;
+IRrecv irrecv(receiver);    
+decode_results results;    
+
+void setup()
+{ 
+  Serial.begin(9600);
+  irrecv.enableIRIn(); 
+  Serial.begin(9600); 
+  myservo.attach(7); 
+  myservo.write(pos);
+  pinMode(trig,OUTPUT);
+  pinMode(echo,INPUT);
+}
+
+void loop()
+{
+  digitalWrite(trig,LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig,HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig,LOW);
+  duration = pulseIn(echo,HIGH);
+  distance = 100.0*(343.0*(duration/2.0))/1000000.0; 
+  Serial.println(distance);
+  
+  if(distance>=15)
+  {
+   myservo.write(pos);
+   small_stepper.setSpeed(500);
+   small_stepper.step(10);
+   delay(5);
+  }
+  
+  if(distance<=15 && stage==0)
+  {
+   myservo.write(0);//turn left to avoid object
+   small_stepper.setSpeed(500);
+   small_stepper.step(3000);
+   myservo.write(45);//go straight
+   small_stepper.step(3000);
+   delay(50);
+   myservo.write(90);//turn right
+   small_stepper.step(4000);
+   myservo.write(45);//go straight
+   small_stepper.step(3000);
+   delay(50);
+   myservo.write(90);//turn right
+   small_stepper.step(3000);
+   myservo.write(45);//go straight
+   small_stepper.step(3000);
+   delay(50);
+   myservo.write(0);//turn left
+   small_stepper.step(3000); 
+
+   stage = 1;//so it dosnt repeat when its at the end 
+  }
+  
+
+}
+
